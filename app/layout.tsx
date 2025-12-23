@@ -5,6 +5,7 @@ import "./globals.css";
 import TanStackProvider from "@/components/TanStackProvider/TanStackProvider";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
+import { Toaster } from "react-hot-toast";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -41,12 +42,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${roboto.variable}`}>
+      <body className={roboto.variable}>
         <TanStackProvider>
           <Header />
           <main>{children}</main>
           {modal}
           <Footer />
+          {/* Global toaster for the entire app */}
+          <Toaster position="top-right" />
         </TanStackProvider>
       </body>
     </html>

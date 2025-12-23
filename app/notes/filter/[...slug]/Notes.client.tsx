@@ -7,7 +7,7 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { fetchNotes } from "@/lib/api";
 import NoteList from "@/components/NoteList/NoteList";
 import type { Note } from "@/types/note";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import Link from "next/link";
 
 import SearchBox from "@/components/SearchBox/SearchBox";
@@ -24,7 +24,6 @@ interface NotesClientProps {
 
 export default function NotesClient({ tag }: NotesClientProps) {
   const [currentPage, setCurrentPage] = useState(1);
-
   const [search, setSearch] = useState("");
 
   const [debouncedSearch] = useDebounce(search, 300);
@@ -37,13 +36,17 @@ export default function NotesClient({ tag }: NotesClientProps) {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch]);
+  }, [debouncedSearch, tag]);
 
   useEffect(() => {
-    if (data && data.notes.length === 0) {
+    if (!data) return;
+
+    const isFiltering = debouncedSearch.length > 0 || tag !== "all";
+
+    if (isFiltering && data.notes.length === 0) {
       toast.error("No notes found.");
     }
-  }, [data]);
+  }, [data, debouncedSearch, tag]);
 
   if (!data) return null;
 
@@ -51,19 +54,21 @@ export default function NotesClient({ tag }: NotesClientProps) {
     <div className={css.app}>
       <div className={css.toolbar}>
         <SearchBox onChange={setSearch} />
-        {data && data.totalPages > 1 && (
+
+        {data.totalPages > 1 && (
           <Pagination
             pageCount={data.totalPages}
             currentPage={currentPage}
             onPageChange={setCurrentPage}
           />
         )}
+
         <Link href="/notes/action/create" className={css.createNoteLink}>
           Create note +
         </Link>
       </div>
+
       {data.notes.length > 0 && <NoteList notes={data.notes} />}
-      <Toaster />
     </div>
   );
 }
